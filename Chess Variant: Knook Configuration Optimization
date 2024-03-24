@@ -1,0 +1,208 @@
+# a. (2 marks) 
+def threatening(s1,s2):
+  x1, y1 = s1
+  x2, y2 = s2
+
+  #Checking if the knooks are in the same column or row, in a rook attack
+  if x1 == x2 or y1 == y2:
+     return True
+
+  #Checking if the knooks are in an attacking position for the knight
+  knightMoves = [
+        (x1 + 2, y1 + 1), (x1 + 2, y1 - 1),
+        (x1 - 2, y1 + 1), (x1 - 2, y1 - 1),
+        (x1 + 1, y1 + 2), (x1 + 1, y1 - 2),
+        (x1 - 1, y1 + 2), (x1 - 1, y1 - 2)
+    ] 
+  
+  return s2 in knightMoves
+
+# b. (6 marks)
+def safeConfig(sqs):
+  return all(
+        not any(threatening(s1, s2) for s2 in sqs if s1 != s2)
+        for s1 in sqs
+  ) #Checks for each 's1' in 'sqs' for an element 's2' such that 
+    #threatening(s1, s2) returns True and s1 is not equal to s2.
+
+
+# Write the OCaml versions of `threatening` and `safeConfig`
+# as Python comments below, and ensure you get the same results
+# as in your Python versions.
+
+# let threatening p1 p2 = 
+  # let x1, y1 = p1 
+#     in
+  # let x2, y2 = p2
+# in
+# if x1 = x2 || y1 = y2 then
+    #true
+  #else 
+  # 
+  # let knight_moves = [
+  # (x1 + 2, y1 + 1); (x1 + 2, y1 - 1);
+  # (x1 - 2, y1 + 1); (x1 - 2, y1 - 1);
+  # (x1 + 1, y1 + 2); (x1 + 1, y1 - 2);
+  # (x1 - 1, y1 + 2); (x1 - 1, y1 - 2)
+  # ] in
+  # let rec is_in_list lst elem =
+  # match lst with
+  # | [] -> false
+  #   | hd :: tl -> hd = elem || is_in_list tl elem
+  # in
+  # is_in_list knight_moves p2
+
+#First we create a helper function for "let safeConfig sqs" to simplify our code
+
+#let rec anyPotentialThreatening pair rest =
+ # match rest with (*Using a match function)
+ # | [] -> false (*An empty list returns false)
+  #| head :: tail -> threatening pair head || anyPotentialThreatening pair tail
+# (*Pattern matching on a non-empty list, on which the head represents the
+#  first element of the list, whereas tail represents all the remaining elements
+#  after. Our reference to threatening pair head allows us to check if the knook 
+# that pair represents is threatening the knook represented by the head.
+# On the other hand, we reccursively call the anyPotentialThreatening function on the 
+# remaining elements on tail, to check if pair (Knook) is threatening any of the remaining
+# knooks left in the list.*)
+
+# let rec safeConfig sqs = 
+ # match sqs with (*Using pattern matching for our sqs argument*)
+  #| [] -> true (*Returning true for an empty list)
+  #| knook :: rest -> not (anyPotentialThreatening knook rest) && safeConfig rest
+  # (*If our argument sqs is a non-empty list, we use we use knook to represent the
+  #  first element of the list and rest to represent the rest, in knook::rest pattern,
+  #  We call upon our helper function anyPotentialThreatening to check if the knook is 
+  # a threat or threatening any of ther remaining knooks in rest, the remainder of the list.
+  # Our not negates the result of this check, evaluating to true. We finally recursively 
+  # call the safeConfig configuration on rest, to ensure the entire configuration is safe*)
+
+#Defining a helper function with the parameters board, row, column and n. In this question
+# we interchangeably use the terms 'knights' and 'knooks' for variation. 
+def isKnookSafe(board, row, column, n):
+  for i in range(n):
+      if board[row][i] == 1 or board[i][column] == 1:
+          return False
+  #Checking if a piece is in the same row or column
+    
+  knightThreats = [(-2, -1), (-1, -2), (1, -2), (2, -1), (-2, 1), (-1, 2), (1, 2), (2, 1)]
+  #Defining possible knight moves
+
+  for move in knightThreats:
+      newRow, newColumn = row + move[0], column + move[1]
+      if 0 <= newRow < n and 0 <= newColumn < n and board[newRow][newColumn] == 1:
+          return False
+  #For every move in the 'nightThreats', we calculate the new position, the row and column, by adding the 
+  #move offset to the current position (the row and column). We then check if the new position is within the
+  #chessboard and if a knight exists within that position. If the knight is found, we return false, since there
+  # is a threat
+
+  return True
+  #If the Knook is safe, meaning no threat was found, it re
+
+#Defining another helper function, 'placeKnooksOnBoard' with the mentioned parameters.
+def placeKnooksOnBoard(board, column, n, result, configurations):
+ 
+    if column == n:
+        result[0] += 1
+        configurations.append([(i, row) for i, row in enumerate(board)])
+        return
+    #If a valid configuration has been found, we increment the result counter by 1 and then append
+    # the current configuration to the list of configurations, through the 'append' method. This is not
+    # a library function and is a method provided by lists.
+
+    for row in range(n):
+        if isKnookSafe(board, row, column, n):
+            board[row][column] = 1
+            placeKnooksOnBoard(board, column + 1, n, result, configurations)
+            board[row][column] = 0
+    #Through calling the 'isKnooksSafe' function, we check if placing a knight in each row is safe. If it is
+    # then we mark the position on the board before recursively calling itself for the next column. We then backtrack
+    # through unmarking the position and begin to explore other potential places.
+
+# c. (4 marks)
+#Defining our first helper function with the parameters,board, row, column, n. We use the terms knights and knooks interchangeable
+#for variation
+def isKnookSafe(board, row, column, n):
+    
+    for i in range(n):
+        if board[row][i] == 1 or board[i][column] == 1:
+            return False
+    #Checking if a piece is in the same row or column
+    
+    knightThreats = [(-2, -1), (-1, -2), (1, -2), (2, -1), (-2, 1), (-1, 2), (1, 2), (2, 1)]
+    #Defining possible knight moves
+
+    for move in knightThreats:
+        newRow, newColumn = row + move[0], column + move[1]
+        if 0 <= newRow < n and 0 <= newColumn < n and board[newRow][newColumn] == 1:
+            return False
+    #For every move in the 'nightThreats', we calculate the new position, the row and column, by adding the 
+    #move offset to the current position (the row and column). We then check if the new position is within the
+    #chessboard and if a knight exists within that position. If the knight is found, we return false, since there
+    #is a threat
+    
+    return True
+    #If the Knook is safe, meaning no threat was found, it returns True
+
+#Defining another helper function, 'placeKnooksOnBoard' with the mentioned parameters.
+def placeKnooksOnBoard(board, column, n, result, configurations):
+    if column == n:
+        result[0] += 1
+        configurations.append([(i, board[i].index(1)) for i in range(n)])
+        return
+    #If a valid configuration has been found, we increment the result counter by 1 and then append
+    # the current configuration to the list of configurations, through the 'append' method. This is not
+    # a library function and is a method provided by lists.
+
+    for row in range(n):
+        if isKnookSafe(board, row, column, n):
+            board[row][column] = 1
+            placeKnooksOnBoard(board, column + 1, n, result, configurations)
+            board[row][column] = 0
+    #Through calling the 'isKnooksSafe' function, we check if placing a knight in each row is safe. If it is
+    # then we mark the position on the board before recursively calling itself for the next column. We then backtrack
+    # through unmarking the position and begin to explore other potential places.
+
+def allKnooks(n):
+    board = [[0] * n for _ in range(n)]
+    #Creating an empty chessboard for our Knooks
+
+    resultCounter = [0]
+    #A counter initialized for the number of valid configurations
+
+    configurationsList = []
+    #Creating a list to store configurations
+
+    placeKnooksOnBoard(board, 0, n, resultCounter, configurationsList)
+    #Setting up our chessboard and finding configurations through the helper function
+
+    return configurationsList
+    #Returning a list of configurations where knights  can be placed on the chessboard 
+    # without threatening each other
+
+# The above code allows us to explore all the ways to place knooks on the board without any
+# threats. First, we check if  placing a knight at a certain spot on the chessboard is safe, along
+# with considering any moves the knights can make. Next, we recursively go through and explore 
+# all the  different configurations of placing knights on the chessboard, considering the row and column.
+# Finally, our main function allows us to initialize an empty chessboard and set up a counter for the valid 
+# configurations and place knights on the chessboard, returning a final list of configuration in which the 
+# coordinates represent the positions of the knights.
+
+# ----------
+
+
+
+if __name__ == "__main__":
+    print("-----(a)-----")
+    print(threatening((0,0),(2,2))) # False
+    print(threatening((0,0),(1,2))) # True
+    print(threatening((0,0),(4,0))) # True
+    print("-----(b)-----")
+    print(safeConfig([(0,0),(1,1),(2,2)])) # True
+    print(safeConfig([(0,0),(1,2),(4,4)])) # False
+    print("-----(c)-----")
+    print(allKnooks(2))
+    print(len(allKnooks(4))) # 8
+    print(len(allKnooks(5))) # 20
+    print(len(allKnooks(6))) # 94
